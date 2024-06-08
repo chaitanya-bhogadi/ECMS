@@ -144,7 +144,7 @@ class GovtIDTypeChoices(models.TextChoices):
 
     AADHAR = 'aadhar'
     PAN = 'pan'
-    PASSWORD = 'password'
+    PASSPORT = 'passport'
     VOTERID = 'voterid'
 
 
