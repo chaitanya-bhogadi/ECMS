@@ -32,7 +32,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [env("HOST_PUBLIC_IP"), env("HOST_PRIVATE_IP"),]
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",  # blacklist refresh token after rotation
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "staff_app.User"
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -144,6 +146,10 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
+CORS_ORIGIN_WHITELIST = [
+    f"http://{env('HOST_PUBLIC_IP')}:{env('HOST_FRONTEND_PORT')}",
+]
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
