@@ -1,0 +1,20 @@
+version: '3.8'
+ 
+services:
+ 
+  backend:
+    build: ./backend
+    image: ecms_backend
+    container_name: ecms_backend
+    ports:
+      - 8000:8000
+ 
+  frontend:
+    build: ./frontend
+    image: ecms_frontend
+    container_name: ecms_frontend
+    ports:
+      - 3000:3000
+    command: npm start
+    depends_on:
+      - backend
