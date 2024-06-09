@@ -8,4 +8,5 @@ urlpatterns = [
     path("track_application/", views.application_track_views),
     path("applications/",views.AllApplicationTrackAPIView.as_view()),
     path("auth/logout/", views.logout),
+    path("monthly_stats/", views.get_all_months_stats),
 ]

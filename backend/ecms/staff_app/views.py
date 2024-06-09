@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -227,13 +228,17 @@ def application_track_views(request):
 
             del request.data["id"]
             # Serialize the Application Track object with the updated data
-            serializer = PostApplicationTrackerSerializer(
+            serializer = ApplicationTrackerSerializer(
                 instance=application_track_obj, data=request.data, partial=True
             )
 
             # If the serializer is valid, save the data and return a success
             # response
             if serializer.is_valid():
+                if request.data.get("status",None) == "approved":
+                    application_instance = Application.objects.get(id=application_track_obj.application_id)
+                    application_instance.date_of_approval = request.data.get("date_of_approval")
+                    application_instance.save()
                 serializer.save()
                 return Response(
                     {
@@ -337,3 +342,51 @@ def logout(request):
         # request user ID and return a bad request response with a status code of
         # 400
         return Response({"error": str(_e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_all_months_stats(request):
+    # TO fetch number of applications grouped based on months with its status
+    result = []
+    for each_month in [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ]:
+        result.append(
+            {
+                "approved": 0,
+                "pending": 0,
+                "rejected": 0,
+                "connection_released": 0,
+                "month": each_month,
+            }
+        )
+    try:
+        applications_counts_status = Application.objects.values(
+            "date_of_application__month", "trackers__status"
+        ).annotate(count=Count("id"))
+        for _each_application in applications_counts_status:
+            result[int(_each_application["date_of_application__month"]) - 1][
+                _each_application["trackers__status"]
+            ] += _each_application["count"]
+
+    except Exception as e:
+        return Response(
+            {
+                "message": "Something went wrong issue with the server",
+                "error": str(e),
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    return Response(result, status=status.HTTP_200_OK)
