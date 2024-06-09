@@ -1,0 +1,1 @@
+export const baseURL = `http://${process.env.REACT_APP_BACKEND_HOST_IP}:${process.env.REACT_APP_BACKEND_HOST_PORT}`
